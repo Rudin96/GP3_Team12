@@ -4,6 +4,7 @@
 #include "GP3_AICharacterBase.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardData.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AGP3_AICharacterBase::AGP3_AICharacterBase()
@@ -32,4 +33,3 @@ void AGP3_AICharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
-

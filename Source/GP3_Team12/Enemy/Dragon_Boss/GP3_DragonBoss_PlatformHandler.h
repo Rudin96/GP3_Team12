@@ -18,6 +18,18 @@ public:
 
 	AGP3_DragonBossPlatformHandler(); 
 
+	void AdjustRotationTowards(const FVector& Pos);
+
+	void FlipRotation();
+
+protected:
+
+	virtual void Tick(float DeltaTime) override;
+
+	virtual void BeginPlay() override;
+
+	void UpdateBossMovement(float DeltaTime);
+
 private: 
 
 	UFUNCTION()
@@ -26,6 +38,10 @@ private:
 	UFUNCTION()
 	void FireEndOverlapEvents(UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	FQuat NewRotation;
+
+	FVector NewPosition;
 
 public: 
 
@@ -37,5 +53,20 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnHandleEndOverlapDelegate OnPlayerExitIsland;	
+
+	UPROPERTY(EditAnywhere)
+		FVector LocOffset;
+
+	UPROPERTY(EditAnywhere)
+		FRotator RotOffset;
+
+	FVector AttachPosition;
+
+	float MaxDistance = 1000.f;
+
+	float DistanceOffset = 1000.f;
+
+	UPROPERTY(EditAnywhere)
+		float RotationSpeed = 30.f;
 
 };

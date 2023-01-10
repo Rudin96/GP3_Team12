@@ -50,17 +50,20 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float MaxHealth = 100.f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite = Category = "Camera")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
 		float MinBoomLength = 200.f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite = Category = "Camera")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
 		float MaxBoomLength = 2000.f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite = Category = "Camera")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
 		float ZoomAmount = 200.f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite = Category = "Camera")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
 		float ZoomLerpSpeed = 20.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
+	float CameraSensitivity = 1.f;
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bIsInvulnerable = false;
@@ -104,6 +107,9 @@ public:
 
 	UFUNCTION()
 	void AddImpulse(const FVector& Dir);
+
+	UFUNCTION()
+	void SetCameraSensitivity(float sensitivity);
 
 protected:
 

@@ -50,15 +50,18 @@ void AGP3_ProjectileBase::HandleOverlap(UPrimitiveComponent* OverlappedComponent
 {
 	OnProjectileHit();
 
-	if (AGP3_CharacterBase* Player = Cast<AGP3_CharacterBase>(OtherActor))
+	/*if (AGP3_CharacterBase* Player = Cast<AGP3_CharacterBase>(OtherActor))
 	{
 	}
 	if (ABossAICharacter* BossCharacter = Cast<ABossAICharacter>(OtherActor))
 	{
-		OtherActor->TakeDamage(Damage, FDamageEvent(), nullptr, this);
-	}
+	}*/
 
-	Destroy();
+	if (OtherActor != nullptr)
+	{
+		OtherActor->TakeDamage(Damage, FDamageEvent(), nullptr, this);
+		Destroy();
+	}
 }
 
 void AGP3_ProjectileBase::OnProjectileHit_Implementation()

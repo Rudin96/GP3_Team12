@@ -4,6 +4,7 @@
 #include "GP3_Boss_AICharacter.h"
 #include "../../Game/GP3_GameModeBase.h"
 #include "GP3_Team12/Game/GP3_GameInstance.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 ABossAICharacter::ABossAICharacter()
@@ -34,7 +35,7 @@ void ABossAICharacter::Tick(float DeltaTime)
 
 void ABossAICharacter::OnPendingKill_Implementation()
 {
-
+	this->GetCharacterMovement()->MaxWalkSpeed = 0.f;
 }
 
 // Called to bind functionality to input
@@ -78,14 +79,21 @@ ABossAICharacter* ABossAICharacter::Get(UObject* WorldContext)
 	// UWorld* World = WorldContext->GetWorld();
 	// TArray<AActor*> Actors = World->PersistentLevel->Actors;
 	// return Cast<ABossAICharacter>(Actors[0]);
-	TArray<AActor*> Bosses;
-	UGameplayStatics::GetAllActorsOfClass(WorldContext->GetWorld(), ABossAICharacter::StaticClass(), Bosses);
-	if(Bosses.Num() > 0 && Cast<ABossAICharacter>(Bosses[0]) != nullptr)
+	//TArray<AActor*> Bosses;
+	if (ABossAICharacter* CurrentBoss = Cast<ABossAICharacter>(UGameplayStatics::GetActorOfClass(WorldContext->GetWorld(), ABossAICharacter::StaticClass())))
+	{
+		return CurrentBoss;
+	}
+	else
+	{
+		return nullptr;
+	}
+	/*if(Bosses.Num() > 0 && Cast<ABossAICharacter>(Bosses[0]) != nullptr)
 	{
 		return Cast<ABossAICharacter>(Bosses[0]);
 	}
 	else
 	{
 		return nullptr;
-	}
+	}*/
 }

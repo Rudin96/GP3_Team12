@@ -109,7 +109,7 @@ void UGP3_PlayerWeapon::SetProjectilePathCurveHorizontal(UCurveFloat* Curve)
 
 void UGP3_PlayerWeapon::AddProjectilePathCurveVertical(UCurveFloat* Curve)
 {
-	UCurveFloat* NewCurve = DuplicateObject(Curve, GetOuter(), "ModifiedCurve");
+	UCurveFloat* NewCurve = DuplicateObject(Curve, GetOuter(), "ModifiedCurveV");
 	TArray<FRichCurveKey> Keys = UnmodifiedProjectilePathCurveVertical->FloatCurve.GetCopyOfKeys();
 	for (const FRichCurveKey Key : Keys)
 	{
@@ -121,7 +121,7 @@ void UGP3_PlayerWeapon::AddProjectilePathCurveVertical(UCurveFloat* Curve)
 
 void UGP3_PlayerWeapon::AddProjectilePathCurveHorizontal(UCurveFloat* Curve)
 {
-	UCurveFloat* NewCurve = DuplicateObject(Curve, GetOuter(), "ModifiedCurve");
+	UCurveFloat* NewCurve = DuplicateObject(Curve, GetOuter(), "ModifiedCurveH");
 	TArray<FRichCurveKey> Keys = UnmodifiedProjectilePathCurveHorizontal->FloatCurve.GetCopyOfKeys();
 	for (const FRichCurveKey Key : Keys)
 	{

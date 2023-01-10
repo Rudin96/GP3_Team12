@@ -2,6 +2,8 @@
 
 
 #include "GP3_GameInstance.h"
+
+#include "AudioDevice.h"
 #include "GP3_Team12/AI/BossAI/GP3_Boss_AICharacter.h"
 #include "GP3_Team12/Game/GP3_WhatIf_Base.h"
 #include "GP3_Team12/Game/GP3_WhatIf_Brain.h"
@@ -16,15 +18,19 @@ UGP3_GameInstance* UGP3_GameInstance::Get(UObject* WorldContext)
 void UGP3_GameInstance::Init()
 {
 	Super::Init();
-	//CurrentPlayer = GetPlayer(GetWorld());
+	LoadConfig();
+
 	UE_LOG(LogTemp, Log, TEXT("UGP3_GameInstance called!"));
+
+	GetWorld()->GetTimerManager().SetTimer(AudioInitTimerHandle,this, &UGP3_GameInstance::InitAudio, 0.1f,false);
 }
+
+
 
 void UGP3_GameInstance::ApplyWhatIfs()
 {
 	if (AGP3_WhatIfBrain* FoundBrain = Cast<AGP3_WhatIfBrain>(UGameplayStatics::GetActorOfClass(GetWorld(), AGP3_WhatIfBrain::StaticClass())))
 	{
-		//WhatifNames.Empty();
 		for (auto s : WhatifNames)
 		{
 			FoundBrain->ChangeWhatIf(s);
@@ -39,8 +45,11 @@ float UGP3_GameInstance::CalculateBossHealthFromStage()
 
 void UGP3_GameInstance::SetStage(int NewStage = 1)
 {
+
 	if (NewStage < 1)
 		return;
+
+	Stage = NewStage;
 
 	if (NewStage == 1)
 	{
@@ -55,23 +64,42 @@ void UGP3_GameInstance::SetStage(int NewStage = 1)
 		if (Player == nullptr)
 			return;
 
-		PlayerMaxHealth = Player->MaxHealth;
 		PlayerHealth = Player->Health;
 	}
-
-	/*ABossAICharacter* CurrentBoss = ABossAICharacter::Get(GetWorld());
-
-	float OldPercentageHealth = CurrentBoss->Health / CurrentBoss->MaxHealth;
-
-	CurrentBoss->MaxHealth = CalculateBossHealthFromStage();
-	CurrentBoss->Health = CurrentBoss->MaxHealth * OldPercentageHealth;
-
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.5f, FColor::Black, FString::Printf(TEXT("New health equal to %f"), CurrentBoss->Health));*/
 }
 
 void UGP3_GameInstance::IncrementStage()
 {
 	SetStage(++Stage);
+}
+
+void UGP3_GameInstance::SetCameraSensitivity(const float Sensitivity)
+{
+	CameraSensitivity = Sensitivity;
+	SaveConfig();
+	AGP3_CharacterBase* Player = GetPlayer(GetWorld());
+	if (Player != nullptr)
+	{
+		Player->SetCameraSensitivity(Sensitivity);
+	}
+}
+
+void UGP3_GameInstance::SetMasterVolume(const float Volume)
+{
+	MasterVolume = Volume;
+	SaveConfig();
+}
+
+void UGP3_GameInstance::SetShowStats(const bool Show)
+{
+	bShowStats = Show;
+	SaveConfig();
+}
+
+void UGP3_GameInstance::InitAudio() const
+{
+	GetWorld()->GetAudioDevice().GetAudioDevice()->SetSoundMixClassOverride(MasterMix,nullptr, MasterVolume,1.f,0.1f,true);
+	GetWorld()->GetAudioDevice().GetAudioDevice()->SetBaseSoundMix(MasterMix); //PushSoundMixModifier(MasterMix);
 }
 
 AGP3_CharacterBase* UGP3_GameInstance::GetPlayer(UObject* WorldContext)

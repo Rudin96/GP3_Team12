@@ -12,6 +12,7 @@
  */
 
 class USphereComponent;
+class AGP3_DragonBossPlatformHandler;
 
 UCLASS()
 class GP3_TEAM12_API AGP3_DragonBossCharacter : public ABossAICharacter
@@ -34,13 +35,9 @@ protected:
 
 private:
 
-	FQuat NewRotation;
-
-	FVector NewPosition;
-
 	FVector CurrentLocation;
 
-	AActor* TargetActor;
+	AGP3_DragonBossPlatformHandler* TargetActor;
 
 	FTimerHandle SwitcherHandle;
 
@@ -56,25 +53,6 @@ public:
 		USphereComponent* Collider;
 
 	UPROPERTY(EditAnywhere)
-		FVector LocOffset;
-
-	UPROPERTY(EditAnywhere)
-		FRotator RotOffset;
-
-		float MaxDistance = 1000.f;
-
-		float DistanceOffset = 1000.f;
-
-	UPROPERTY(EditAnywhere)
-		float RotationSpeed = 30.f;
-
-	UPROPERTY(EditAnywhere)
-		int TargetActorIndex = 0;
-
-	UPROPERTY(EditAnywhere)
-		float SwitchPlatformDelay = 10.f;
-
-	UPROPERTY(EditAnywhere)
 		bool bSwitchDirOnNewActor = true;
 
 	UPROPERTY(EditAnywhere)
@@ -87,6 +65,18 @@ public:
 		bool bRotateTowardsTarget = true;
 
 	UPROPERTY(EditAnywhere)
+		FRotator RotOffset;
+
+	UPROPERTY(EditAnywhere)
+		int TargetActorIndex = 0;
+
+	UPROPERTY(EditAnywhere)
+		float SwitchPlatformDelay = 10.f;
+
+	UPROPERTY(EditAnywhere)
+		FVector LocOffset;
+
+	UPROPERTY(EditAnywhere)
 		float TargetActorSwitchDistanceThreshold = 500.f;
 
 	UPROPERTY(EditAnywhere)
@@ -96,5 +86,5 @@ public:
 		float LerpSpeedRotation = 2.f;
 
 	UPROPERTY(EditAnywhere)
-		TArray<AActor*> TargetActors;
+		TArray<AGP3_DragonBossPlatformHandler*> TargetPlatforms;
 };

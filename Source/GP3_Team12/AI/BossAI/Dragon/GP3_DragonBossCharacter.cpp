@@ -12,11 +12,7 @@ void AGP3_DragonBossCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetWorldTimerManager().SetTimer(SwitcherHandle, this, &AGP3_DragonBossCharacter::SetSwitchReady, SwitchPlatformDelay, true, SwitchPlatformDelay);
-
-	auto* RenderSettings = GetMutableDefault<URendererSettings>();
-
-	RenderSettings->MSAASampleCount = ECompositingSampleCount::Eight;
+	GetWorldTimerManager().SetTimer(SwitcherHandle, this, &AGP3_DragonBossCharacter::SetSwitchReady, SwitchPlatformDelay, true);
 }
 
 AGP3_DragonBossCharacter::AGP3_DragonBossCharacter()
@@ -27,26 +23,42 @@ AGP3_DragonBossCharacter::AGP3_DragonBossCharacter()
 
 void AGP3_DragonBossCharacter::CheckDistances(float DeltaTime)
 {
-	if (TargetActors.IsEmpty())
+	if (TargetPlatforms.IsEmpty())
 		return;
 
-	for (size_t i = 0; i < TargetActors.Num(); i++)
+	for (size_t i = 0; i < TargetPlatforms.Num(); i++)
 	{
 		if (i == TargetActorIndex || i == PreviousTargetIndex)
 			continue;
 
-		FVector DistanceToTarget = TargetActors[i]->GetActorLocation() - GetActorLocation();
+		FVector DistanceToTarget = GetActorLocation() - TargetPlatforms[i]->GetActorLocation();
 
+		FVector NewAttachDir = TargetPlatforms[i]->GetActorLocation() - TargetPlatforms[i]->AttachPosition;
+
+		FVector AttachDirNormal = NewAttachDir.GetSafeNormal();
+
+		float DirDot = FVector::DotProduct(AttachDirNormal, GetActorLocation());
+
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 0.f, FColor::Cyan, FString::SanitizeFloat(DirDot));
 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 0.f, FColor::Magenta, FString::SanitizeFloat(DistanceToTarget.Length()));
+
+		DrawDebugSphere(GetWorld(), TargetPlatforms[i]->GetActorLocation(), 600.f, 20, FColor::Yellow);
 
 		if (DistanceToTarget.Length() < TargetActorSwitchDistanceThreshold && bIsSwitchReady)
 		{
 			PreviousTargetIndex = TargetActorIndex;
 			TargetActorIndex = i;
-			if (bSwitchDirOnNewActor)
-				SwitchDirection();
-			if (bSwitchRotOnNewActor)
-				SwitchRotation();
+			
+			/*if (DirDot < 0.f)
+				TargetPlatforms[i]->FlipRotation();*/
+
+			TargetPlatforms[i]->AdjustRotationTowards(DistanceToTarget);
+			
+			/*if (bSwitchDirOnNewActor)
+				SwitchDirection();*/
+
+			/*if (bSwitchRotOnNewActor)
+				SwitchRotation();*/
 
 			bIsSwitchReady = false;
 			break;
@@ -62,52 +74,51 @@ void AGP3_DragonBossCharacter::SetSwitchReady()
 
 void AGP3_DragonBossCharacter::SwitchDirection()
 {
-	RotationSpeed = RotationSpeed * -1.f;
+	//RotationSpeed = RotationSpeed * -1.f;
 }
 
 void AGP3_DragonBossCharacter::SwitchRotation()
 {
-	NewRotation = NewRotation.Inverse();
+	//NewRotation = NewRotation.Inverse();
 }
 
 void AGP3_DragonBossCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (TargetActors.IsEmpty())
+	if (TargetPlatforms.IsEmpty())
 		return;
 
-	TargetActor = TargetActors[TargetActorIndex];
+	TargetActor = TargetPlatforms[TargetActorIndex];
 
 	CurrentLocation = GetActorLocation();
 
-	DrawDebugSphere(GetWorld(), TargetActor->GetActorLocation(), 600.f, 20.f, FColor::White);
+	DrawDebugSphere(GetWorld(), TargetActor->GetActorLocation(), 600.f, 20, FColor::White);
 	
 	//NewRotation = FQuat::MakeFromEuler(FVector(GetActorRightVector() * RotationSpeed * DeltaTime));
 
-	NewRotation = FQuat::MakeFromEuler(FVector(NewRotation.Euler().X, NewRotation.Euler().Y, NewRotation.Euler().Z + RotationSpeed * DeltaTime));
+	if(!bIsPendingKill)
+		SetActorLocation(FMath::Lerp<FVector, float>(GetActorLocation(), TargetActor->AttachPosition, LerpSpeed * DeltaTime));
 
-	NewPosition = NewRotation * LocOffset + TargetActor->GetActorLocation();
+	AGP3_CharacterBase* Player = UGP3_GameInstance::GetPlayer(GetWorld());
 
-	DrawDebugLine(GetWorld(), TargetActor->GetActorLocation(), NewPosition, FColor::Magenta, false, 0.f, (uint8)0U, 5.f);
-
-	//SetActorLocation(NewPosition);
-	SetActorLocation(FMath::Lerp<FVector, float>(GetActorLocation(), NewPosition, LerpSpeed * DeltaTime));
-
-	FVector Dir = UGP3_GameInstance::GetPlayer(GetWorld())->GetActorLocation() - GetActorLocation();
-	Dir.Normalize();
-
-	if (bRotateTowardsTarget)
+	if (Player != nullptr)
 	{
-		FRotator TargetRotation = FRotator(Dir.ToOrientationRotator()) + RotOffset;
-		SetActorRotation(FMath::Lerp<FRotator, float>(GetActorRotation(), TargetRotation, LerpSpeedRotation * DeltaTime));
-	}
-	else
-	{
-		FRotator TargetRotation = RotOffset;
-		SetActorRotation(FMath::Lerp<FRotator, float>(GetActorRotation(), TargetRotation, LerpSpeedRotation * DeltaTime));
-	}
+		FVector Dir = Player->GetActorLocation() - GetActorLocation();
+		Dir.Normalize();
 
+		if (bRotateTowardsTarget)
+		{
+			FRotator TargetRotation = FRotator(Dir.ToOrientationRotator()) + RotOffset;
+			SetActorRotation(FMath::Lerp<FRotator, float>(GetActorRotation(), TargetRotation, LerpSpeedRotation * DeltaTime));
+		}
+		else
+		{
+			FRotator TargetRotation = RotOffset;
+			SetActorRotation(FMath::Lerp<FRotator, float>(GetActorRotation(), TargetRotation, LerpSpeedRotation * DeltaTime));
+		}
 
+	}
+		
 	CheckDistances(DeltaTime);
 }

@@ -33,9 +33,6 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 		void OnPendingKill();
 
-	UPROPERTY(BlueprintReadOnly)
-		bool bIsPendingKill = false;
-
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

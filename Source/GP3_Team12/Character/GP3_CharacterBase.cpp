@@ -50,14 +50,12 @@ void AGP3_CharacterBase::BeginPlay()
 	Super::BeginPlay();
 	UGP3_GameInstance* GameInstance = UGP3_GameInstance::Get(GetWorld());
 
-	MaxHealth = GameInstance->DefaultPlayerHealth;
-	Health = GameInstance->DefaultPlayerHealth;
-
 	if (GameInstance->Stage > 1)
 	{
-		MaxHealth = GameInstance->PlayerMaxHealth;
+		//MaxHealth = GameInstance->PlayerMaxHealth;
 		Health = GameInstance->PlayerHealth;
 		Health = FMath::Clamp<float>(Health += 50.f, 0.f, MaxHealth);
+		CameraSensitivity = GameInstance->CameraSensitivity;
 
 		GameInstance->ApplyWhatIfs();
 	}
@@ -94,14 +92,20 @@ void AGP3_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 void AGP3_CharacterBase::HandleLookUp(float Value)
 {
-	CameraBoom->AddLocalRotation(FRotator(Value, 0.f, 0.f));
+	if (!MovementComp->bCanMove)
+		return;
+
+	CameraBoom->AddLocalRotation(FRotator(Value * CameraSensitivity, 0.f, 0.f));
 	CameraBoom->SetRelativeRotation(FRotator(FMath::ClampAngle(CameraBoom->GetRelativeRotation().Pitch, -90.f, 90.f), 0.f, 0.f));
 	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 0.f, FColor::Cyan, CameraBoom->GetRelativeRotation().ToString());
 }
 
 void AGP3_CharacterBase::HandleLookRight(float Value)
 {
-	AddControllerYawInput(Value);
+	if (!MovementComp->bCanMove)
+		return;
+
+	AddControllerYawInput(Value * CameraSensitivity);
 }
 
 void AGP3_CharacterBase::HandleMoveForward(float Value)
@@ -141,6 +145,7 @@ void AGP3_CharacterBase::AddImpulse(const FVector& Dir)
 {
 	MovementComp->AddImpulse(Dir);
 }
+
 
 float AGP3_CharacterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
@@ -217,4 +222,9 @@ void AGP3_CharacterBase::SetMovementSpeed(float NewSpeed)
 FVector AGP3_CharacterBase::GetPlayerVelocity()
 {
 	return MovementComp->Velocity;
+}
+
+void AGP3_CharacterBase::SetCameraSensitivity(float Sensitivity)
+{
+	CameraSensitivity = Sensitivity;
 }

@@ -19,6 +19,9 @@ public:
 	// Sets default values for this character's properties
 	AGP3_AICharacterBase();
 
+	UPROPERTY(BlueprintReadOnly)
+		bool bIsPendingKill = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Patrol_Points")
 		TArray<FVector> PatrolPoints;
 	
